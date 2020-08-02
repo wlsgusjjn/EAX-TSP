@@ -1,3 +1,8 @@
 @CHARSET "EUC-KR";
-html, body{heigh:100%}
-	#aaa{font-size:50px}
+html, body{min-width:1260px; width:100%; height:100%}
+	#bar{width:100%; height:35px; background-color:#d8d8d8}
+	.Items{float:left; margin:5px}
+	#result{width:100%}
+	#canv{float:left; width:80%}
+	#costs{float:left; width:18%; height:100%; padding-left:1%; border-left:1px solid #d8d8d8; font-size:12px}
+	.costPO{width:100%}

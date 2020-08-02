@@ -90,19 +90,20 @@ def reset(flg):
     if totalCities < 6:
         if totalCities < 2:
             return
-        
+
         createCities(totalCities)
-        gre_candi = greedy(order)
+        greedy(order)
         min = float('inf')
         x = -1
         val = -1
-        for i in range(len(gre_candi)):
-            val = calcost(gre_candi[i])
-            if min > val:
-                min = val
-                x = i
+        for i in range(len(greedy_list)):
+            if len(greedy_list[i]) > 0:
+                val = calcost(greedy_list[i])
+                if min > val:
+                    min = val
+                    x = i
                 
-        drawPath([gre_candi[x]])
+        drawPath([greedy_list[x]])
         cO1['text'] = min
 
         return
@@ -148,8 +149,6 @@ def reset(flg):
             if i < 3 and max < next_cost[i]:
                 max = next_cost[i]
                 b = i
-
-        esets, next_cost, next_generation, intermediate
 
         c = intermediate[a].copy()
         intermediate[a] = intermediate[b].copy()
@@ -200,8 +199,8 @@ def greedy(arr):
     candi = []
     tmp = []
     
-    a = 0
-    b = randrange(1,n-1)
+    a = randrange(0,n-1)
+    b = randrange(0,n-1)
 
     randCh = [a,b]
     
@@ -215,6 +214,7 @@ def greedy(arr):
 
         while(1):
             min = float('inf')
+            nextv = -1
             for j in range(n-1):
                 if candi[len(candi)-1] == arr[j]:
                     continue
@@ -262,18 +262,6 @@ def greedy(arr):
 
     cPa['text'] = pre_cost[0]
     cPb['text'] = pre_cost[1]
-
-def swap(a,i,j):
-    temp = a[i]
-    a[i] = a[j]
-    a[j] = temp
-
-def mergePath(A,B):
-    for i in range(len(A)-1):
-        edge = canvas.create_line(cities[A[i]][0],cities[A[i]][1] + 470,cities[A[i+1]][0],cities[A[i+1]][1] + 470, fill = "red")
-        edges_M.append(edge)
-        edge = canvas.create_line(cities[B[i]][0],cities[B[i]][1] + 470,cities[B[i+1]][0],cities[B[i+1]][1] + 470, fill = "green")
-        edges_M.append(edge)
 
 def mergeCycles(A,B):
     global totalCities
@@ -369,6 +357,9 @@ def sameEdge(used,arr):
 def inter_conn(sub,li,chk,flg):
     j = 0
     while(j < len(li)):
+        temp = -1
+        a = -1
+        b = -1
         if flg == 1 or flg == 2:
             temp = len(sub)-1
             a = 0
@@ -648,6 +639,13 @@ def clear_path():
         canvas.delete(edges_origin[i])
     for i in range(len(edge_sub)):
         canvas.delete(edge_sub[i])
+
+def mergePath(A,B):
+    for i in range(len(A)-1):
+        edge = canvas.create_line(cities[A[i]][0],cities[A[i]][1] + 470,cities[A[i+1]][0],cities[A[i+1]][1] + 470, fill = "red")
+        edges_M.append(edge)
+        edge = canvas.create_line(cities[B[i]][0],cities[B[i]][1] + 470,cities[B[i+1]][0],cities[B[i+1]][1] + 470, fill = "green")
+        edges_M.append(edge)
 
 def drawInter(arr,e):
     intermd = []
