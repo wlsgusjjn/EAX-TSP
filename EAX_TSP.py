@@ -28,9 +28,7 @@ Eset = []
 intermediate = []
 next_generation = []
 
-def set():
-    global greedy_list
-    
+def set():    
     canvas.delete("all")
     edges_origin.clear()
     edges_A.clear()
@@ -51,10 +49,7 @@ def set():
 
     Eset.clear()
     intermediate.clear()
-    next_generation.clear()
-
-    greedy_list = [[] for _ in range(totalCities)]
-    
+    next_generation.clear()    
 
     cPa['text'] = ""
     cPb['text'] = ""
@@ -76,7 +71,7 @@ def add(arr,e):
     return True
 
 def reset(flg):
-    global totalCities,times,Eset,gre_candi
+    global totalCities,times,Eset,greedy_list
 
 
     if flg == 0:
@@ -85,14 +80,17 @@ def reset(flg):
         cities.clear()
         order.clear()
 
-    set()    
+    set()
 
     if totalCities < 6:
-        if totalCities < 2:
+        if totalCities < 3:
             return
 
-        createCities(totalCities)
-        greedy(order)
+        if flg == 0:
+            createCities(totalCities)
+            greedy_list = [[] for _ in range(totalCities)]
+            greedy(order)
+        keepCities()
         min = float('inf')
         x = -1
         val = -1
@@ -110,8 +108,7 @@ def reset(flg):
 
     if flg == 0:
         createCities(totalCities)
-    else:
-        keepCities()
+        greedy_list = [[] for _ in range(totalCities)]
         
     greedy(order)
     mergePath(bestOrderA,bestOrderB)
@@ -150,21 +147,24 @@ def reset(flg):
                 max = next_cost[i]
                 b = i
 
-        c = intermediate[a].copy()
-        intermediate[a] = intermediate[b].copy()
-        intermediate[b] = c
+        if min > bestCostA or min > bestCostB:
+            reset(1)
+        else:
+            c = intermediate[a].copy()
+            intermediate[a] = intermediate[b].copy()
+            intermediate[b] = c
 
-        d = next_generation[a].copy()
-        next_generation[a] = next_generation[b].copy()
-        next_generation[b] = d
+            d = next_generation[a].copy()
+            next_generation[a] = next_generation[b].copy()
+            next_generation[b] = d
 
-        e = next_cost[a]
-        next_cost[a] = next_cost[b]
-        next_cost[b] = e
+            e = next_cost[a]
+            next_cost[a] = next_cost[b]
+            next_cost[b] = e
 
-        f = esets[a].copy()
-        esets[a] = esets[b].copy()
-        esets[b] = f
+            f = esets[a].copy()
+            esets[a] = esets[b].copy()
+            esets[b] = f
         
 
 def run():
@@ -203,7 +203,6 @@ def greedy(arr):
     b = randrange(0,n-1)
 
     randCh = [a,b]
-    
     for i in range(2):
         if len(greedy_list[randCh[i]]) == n:
             continue
@@ -218,11 +217,12 @@ def greedy(arr):
             for j in range(n-1):
                 if candi[len(candi)-1] == arr[j]:
                     continue
-                
-                temp = calDistance(candi[len(candi)-1],arr[j])
-                if min > temp and chk[j] == 0:
-                    min = temp
-                    nextv = j
+
+                if chk[j] == 0:
+                    temp = calDistance(candi[len(candi)-1],arr[j])
+                    if min > temp:
+                        min = temp
+                        nextv = j
                     
             candi.append(arr[nextv])
             chk[nextv] = 1
@@ -582,28 +582,8 @@ def createCities(n):
         randY = randrange(20,200)
         cities.append([randX,randY])
         order.append(i)
-        II = i
-        s = StringVar(root,II)
-        
-        canvas.create_oval(randX - r, randY - r, randX + r, randY + r)
-        canvas.create_oval(randX - r, randY - r + 230, randX + r, randY + r + 230)
-        canvas.create_oval(randX - r, randY - r + 470, randX + r, randY + r + 470)
-        
-        canvas.create_oval(randX - r + 230, randY - r, randX + r + 230, randY + r)
-        canvas.create_oval(randX - r + 230, randY - r + 230, randX + r + 230, randY + r + 230)
-        canvas.create_oval(randX - r + 230, randY - r + 470, randX + r + 230, randY + r + 470)
-
-        canvas.create_oval(randX - r + 470, randY - r, randX + r + 470, randY + r)
-        canvas.create_oval(randX - r + 470, randY - r + 230, randX + r + 470, randY + r + 230)
-        canvas.create_oval(randX - r + 470, randY - r + 470, randX + r + 470, randY + r + 470)
-
-        canvas.create_oval(randX - r + 720, randY - r, randX + r + 720, randY + r)
-        canvas.create_oval(randX - r + 720, randY - r + 230, randX + r + 720, randY + r + 230)
-        canvas.create_oval(randX - r + 720, randY - r + 470, randX + r + 720, randY + r + 470)
         
     order.append(0)
-    bestCostA = calcost(order)
-    bestCostB = bestCostA
 
 def keepCities():
     global bestCostA,bestCostB,totalCities
@@ -630,15 +610,6 @@ def keepCities():
         canvas.create_oval(X - r + 720, Y - r, X + r + 720, Y + r)
         canvas.create_oval(X - r + 720, Y - r + 230, X + r + 720, Y + r + 230)
         canvas.create_oval(X - r + 720, Y - r + 470, X + r + 720, Y + r + 470)
-        
-    bestCostA = calcost(order)
-    bestCostB = bestCostA
-
-def clear_path():
-    for i in range(len(edges_origin)):
-        canvas.delete(edges_origin[i])
-    for i in range(len(edge_sub)):
-        canvas.delete(edge_sub[i])
 
 def mergePath(A,B):
     for i in range(len(A)-1):

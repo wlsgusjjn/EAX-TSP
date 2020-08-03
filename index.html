@@ -10,44 +10,41 @@
 				<input id="inputCt" type="text">
 			</div>
 			<div class="Items">
-				<button id="startB" type="button" onclick="reset()">Start</button>
+				<button id="startB" type="button" onclick="reset(0)">Start</button>
 			</div>
 			<div class="Items">
-				<button id="othersB" type="button">Others</button>
+				<button id="othersB" type="button" onclick="reset(1)">Others</button>
 			</div>
 			<div class="Items">
-				<button id="esetsB" type="button">E-set</button>
+				<button id="esetsB" type="button" onclick="show_cycle()">E-set</button>
 			</div>
 			<div class="Items">
-				<button id="intersB" type="button">intermediate</button>
+				<button id="intersB" type="button" onclick="show_inter()">intermediate</button>
 			</div>
 			<div class="Items">
-				<button id="offspB" type="button">Offsprings</button>
+				<button id="offspB" type="button" onclick="show_newGene()">Offsprings</button>
 			</div>
 		</div>
 		<div id="result">
-			<canvas id="canv"></canvas>
+			<div id="laycanv">
+				<canvas id="canv" width="1200" height="730"></canvas>
+			</div>
 			<div id="costs">
-				<div>
+				<div style="width:100px">
 					<div class="costPO">
-						<p>Cost (ParentA): </p>
-						<p id="costPa"></p>
+						<p id="costPa" class="cost">Cost (ParentA): </p>
 					</div>
 					<div class="costPO">
-						<p>Cost (ParentB): </p>
-						<p id="costPb"></p>
+						<p id="costPb" class="cost">Cost (ParentB): </p>
+					</div>
+					<div id="offs" class="costPO">
+						<p id="costO1" class="cost">Cost (Offspring1): </p>
 					</div>
 					<div class="costPO">
-						<p>Cost (Offspring1): </p>
-						<p id="costO1"></p>
+						<p id="costO2" class="cost">Cost (Offspring2): </p>
 					</div>
 					<div class="costPO">
-						<p>Cost (Offspring2): </p>
-						<p id="costO2"></p>
-					</div>
-					<div class="costPO">
-						<p>Cost (Offspring3): </p>
-						<p id="costO3"></p>
+						<p id="costO3" class="cost">Cost (Offspring3): </p>
 					</div>
 				</div>
 			</div>
@@ -75,7 +72,13 @@
 			var intermediate = new Array();
 			var next_generation = new Array();
 			
+			var canvas = document.getElementById("canv");
+			var ctx = canvas.getContext("2d");
+			
 			function set(){
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.beginPath();
+			
 				while(bestOrderA.length > 0)
 					bestOrderA.pop();
 				bestCostA = 0.0
@@ -100,22 +103,16 @@
 				while(next_generation.length > 0)
 					next_generation.pop();
 					
-				while(greedy_list.length > 0)
-					greedy_list.pop();
-					
-				for(var i = 0; i < totalCities; i++)
-					greedy_list.push(new Array());
-					
-				document.getElementById("costPa").innerHTML = "";
-				document.getElementById("costPb").innerHTML = "";
-				document.getElementById("costO1").innerHTML = "";
-				document.getElementById("costO2").innerHTML = "";
-				document.getElementById("costO3").innerHTML = "";
+				document.getElementById("costPa").innerHTML = "Cost (ParentA): ";
+				document.getElementById("costPb").innerHTML = "Cost (ParentB): ";
+				document.getElementById("costO1").innerHTML = "Cost (Offspring1): ";
+				document.getElementById("costO2").innerHTML = "Cost (Offspring2): ";
+				document.getElementById("costO3").innerHTML = "Cost (Offspring3): ";
 			}
 			
-			function reset(var flg){
+			function reset(flg){
 				if(flg == 0){
-					var totalCities = document.getElementById("inputCt").value;
+					totalCities = document.getElementById("inputCt").value;
 					
 					while(cities.length > 0)
 						cities.pop();
@@ -126,10 +123,18 @@
 				set();
 				
 				if(totalCities < 6){
-					if(totalCities < 2)
+					if(totalCities < 3)
 						return;
 					
-					createCities(totalCities);
+					if(flg == 0){
+						createCities(totalCities);
+						while(greedy_list.length > 0)
+							greedy_list.pop();
+						for(var i = 0; i < totalCities; i++)
+							greedy_list.push(new Array());
+					}
+					
+					keepCities();
 					greedy(order);
 					var min = Infinity;
 					var x = -1;
@@ -143,21 +148,23 @@
 					}
 					
 					drawPath(greedy_list[x]);
-					document.getElementById("costPa").innerHTML = min;
+					document.getElementById("costPa").innerHTML += min;
 					
 					return;
 				}
 				
 				if(flg == 0)
 					createCities(totalCities);
-				else
-					keepCities();
-					
+					while(greedy_list.length > 0)
+						greedy_list.pop();
+					for(var i = 0; i < totalCities; i++)
+						greedy_list.push(new Array());
+				
 				greedy(order);
 				mergePath(bestOrderA,bestOrderB);
-				while(len(Eset) == 0)
+				while(Eset.length == 0)
 					run();
-					
+				
 				for(var i = 0; i < Eset.length; i++)
 					intermediate.push(inter_sol(bestOrderA,Eset[i]));
 					
@@ -195,21 +202,24 @@
 						}
 					}
 					
-					var c = intermediate[a].slice();
-					intermediate[a] = intermediate[b].slice();
-					intermediate[b] = c;
-					
-					var d = next_generation[a].slice();
-					next_generation[a] = next_generation[b].slice();
-					next_generation[b] = d;
-					
-					var e = next_cost[a];
-					next_cost[a] = next_cost[b];
-					next_cost[b] = e;
-					
-					var f = esets[a].slice();
-					esets[a] = esets[b].slice();
-					esets[b] = f;					
+					if(min > bestCostA || min > bestCostB)	reset(1);
+					else{
+						var c = intermediate[a].slice();
+						intermediate[a] = intermediate[b].slice();
+						intermediate[b] = c;
+						
+						var d = next_generation[a].slice();
+						next_generation[a] = next_generation[b].slice();
+						next_generation[b] = d;
+						
+						var e = next_cost[a];
+						next_cost[a] = next_cost[b];
+						next_cost[b] = e;
+						
+						var f = esets[a].slice();
+						esets[a] = esets[b].slice();
+						esets[b] = f;
+					}					
 				}
 			}
 			
@@ -219,10 +229,10 @@
 				keepCities();
 				greedy(order);
 				mergePath(bestOrderA,bestOrderB);
-				Eset = mergeCycles(bestOrderA,bestOrderB);
+				Eset = mergeCycles(bestOrderA,bestOrderB).slice();
 			}
 			
-			function add(var arr, var e){
+			function add(arr,e){
 				for(var i = 0; i < e.length-1; i += 2){
 					var a = e[i];
 					var b = e[i+1];
@@ -236,7 +246,7 @@
 				return true;
 			}
 			
-			function calcost(var arr){
+			function calcost(arr){
 				var sum = 0;
 				for(var i = 0; i < order.length-1; i++){
 					var x = cities[arr[i]][0] - cities[arr[i+1]][0];
@@ -246,13 +256,13 @@
 				return sum;
 			}
 			
-			function calDistance(var a,var b){
+			function calDistance(a,b){
 				var x = cities[a][0] - cities[b][0];
 				var y = cities[a][1] - cities[b][1];
 				return Math.pow((x*x + y*y),0.5);
 			}
 			
-			function greedy(var arr){
+			function greedy(arr){
 				var n = arr.length;
 				var candi = new Array();
 				var tmp = new Array();
@@ -262,27 +272,29 @@
 				
 				var randCh = [a,b];
 				
-				while(true){
-					if(greedy_list[randCh[i]].length == n)
+				for(var i = 0; i < 2; i++){
+					if(greedy_list[randCh[i]].length != 0)
 						continue;
 						
 					var chk = new Array();
-					for(var i = 0; i < n-1; i++)
+					for(var j = 0; j < n-1; j++)
 						chk.push(0);
 					chk[randCh[i]] = 1;
 					candi.push(arr[randCh[i]]);
-					
+			
 					while(true){
 						var min = Infinity;
 						var nextv = -1;
 						for(var j = 0; j < n-1; j++){
 							if(candi[candi.length-1] == arr[j])
 								continue;
-								
-							var temp = calDistance(candi[candi.length-1],arr[j]);
-							if(min > temp && chk[j] == 0){
-								min = temp;
-								nextv = j;
+							
+							if(chk[j] == 0){
+								var temp = calDistance(candi[candi.length-1],arr[j]);
+								if(min > temp){
+									min = temp;
+									nextv = j;
+								}
 							}
 						}
 						
@@ -300,7 +312,7 @@
 					}
 					k = 0;
 					for(var j = 0; j < candi.length; j++)
-						if(candi[j] == 0):
+						if(candi[j] == 0)
 							k = j;
 					
 					for(var j = 0; j < candi.length; j++)
@@ -321,13 +333,14 @@
 				bestOrderB = greedy_list[b].slice();
 				bestCostB = calcost(bestOrderB);
 				
-				document.getElementById("costPa").innerHTML = bestCostA;
-				document.getElementById("costPb").innerHTML = bestCostB;
+				drawTwoPath(bestOrderA,bestOrderB);
+				document.getElementById("costPa").innerHTML += bestCostA;
+				document.getElementById("costPb").innerHTML += bestCostB;
 			}
 			
-			function mergeCycles(var A, var B){
+			function mergeCycles(A,B){
 				var n = A.length;
-				var AnB = ;
+				var AnB = A.concat(B);
 				var x = -1;
 				var ABcyc = new Array();
 				var candi = new Array();
@@ -374,14 +387,15 @@
 					}
 					ABcyc.push(prsnt);
 					ABcyc.push(nextv);
-					if(ABcyc.length % 2 != 0 && ABcyc.length < totalCities && ABcyc.length > 3 && cycle(ABcyc))
+					
+					if(ABcyc.length % 2 == 1 && ABcyc.length < totalCities && ABcyc.length > 3 && cycle(ABcyc))
 						if(!distinct(candi,ABcyc))
 							candi.push(ABcyc.slice());
 				}
 				return candi;
 			}
 			
-			function cycle(var ABcyc){
+			function cycle(ABcyc){
 				for(var i = 1; i < ABcyc.length-1; i++)
 					for(var j = 0; j < i; j++)
 						if(ABcyc[i] == ABcyc[j])
@@ -389,7 +403,7 @@
 				return true;
 			}
 			
-			function distinct(var candi, var ABcyc){
+			function distinct(candi,ABcyc){
 				var n = ABcyc.length;
 				for(var i = 0; i < candi.length; i++)
 					if(n == candi[i].length){
@@ -426,7 +440,7 @@
 				return false;
 			}
 			
-			function inter_conn(var sub, var li, var chk, var flg){
+			function inter_conn(sub,li,chk,flg){
 				var j = 0;
 				while(j < li.length){
 					var temp = -1;
@@ -446,11 +460,9 @@
 						if(chk[j] == 0 || chk[j] == -1){
 							if(flg == 1 || flg == 2)
 								sub.push(li[j][b]);
-							else if(flg == -1 || flg == -2){
-								for(var i = sub.length; i > 0; i--)
-									sub[j][i] = sub[j][i-1];
-								sub[0] = li[j][b];
-							}
+							else if(flg == -1 || flg == -2)
+								sub.splice(0, 0, li[j][b]);
+								
 							chk[j] = 1;
 							j = 0;
 						} else
@@ -460,24 +472,20 @@
 							if(chk[j] == 0 || chk[j] == -1){
 								if(flg == 2)
 									sub.push(li[j][a]);
-								else if(flg == -2){
-									for(var i = sub.length; i > 0; i--)
-										sub[j][i] = sub[j][i-1];
-									sub[0] = li[j][a];
-								}
+								else if(flg == -2)
+									sub.splice(0, 0, li[j][a]);
+									
 								chk[j] = 1;
 								j = 0;
 							} else
 								j += 1;
 						} else {
 							if(chk[j] == -1){
-								if(flg == -1)
+								if(flg == 1)
 									sub.push(li[j][a]);
-								else if(flg == -1){
-									for(var i = sub.length; i > 0; i--)
-										sub[j][i] = sub[j][i-1];
-									sub[0] = li[j][a];
-								}
+								else if(flg == -1)
+									sub.splice(0, 0, li[j][a]);
+									
 								chk[j] = 1;
 								j = 0;
 							} else
@@ -489,7 +497,7 @@
 				return [sub, li, chk];
 			}
 			
-			function inter_sol(var A, var E{
+			function inter_sol(A, E){
 				var inter = new Array();
 				var sub = new Array();
 				var edges = new Array();
@@ -583,16 +591,17 @@
 				return inter.slice();
 			}
 			
-			function new_connection(var arr){
+			function new_connection(arr){
 				if(arr.length == 1)
 					return arr[0];
-					
+				
 				var a = -1;
 				var b = -1;
 				var c = -1;
 				var d = 0;
 				var tmpLi = new Array();
-				for(var i = 0; i < arr.length-1; i++){
+				var n = arr.length;
+				for(var i = 0; i < n-1; i++){
 					var min = Infinity;
 					for(var j = 0; j < arr[0].length-1; j++)
 						for(var k = 1; k < arr.length; k++)
@@ -620,27 +629,25 @@
 									c = l;
 									d = -1;
 								}
-							}
+							}				
+					
 					for(var j = 0; j < arr[0].length; j++){
 						tmpLi.push(arr[0][j]);
 						if(j == a){
 							if(d == 1)
 								for(var k = 0; k < arr[b].length-1; k++)
-									tmpLi.push(arr[b][(c+len(arr[b])-1-k)%(len(arr[b])-1)]);
+									tmpLi.push(arr[b][(c+arr[b].length-1-k)%(arr[b].length-1)]);
 							else if(d == -1)
 								for(var k = 0; k < arr[b].length-1; k++)
-									tmpLi.push(arr[b][(c+k)%(len(arr[b])-1)]);
+									tmpLi.push(arr[b][(c+k)%(arr[b].length-1)]);
 						}
 					}
 					var idx = arr.indexOf(arr[b]);
 					if(idx > -1) arr.splice(idx,1);
 					idx = arr.indexOf(arr[0]);
 					if(idx > -1) arr.splice(idx,1);
-					arr
 					
-					for(var j = arr.length; j > 0; j--)
-						arr[j] = arr[j-1].slice();
-					arr[0] = tmpLi.slice();
+					arr.splice(0, 0, tmpLi.slice());
 					while(tmpLi.length > 0)	tmpLi.pop();
 				}
 				return arr[0];
@@ -657,9 +664,214 @@
 			function show_newGene(){
 				drawPath(next_generation);
 				
-				document.getElementById("costO1").innerHTML = next_cost[0];
-				document.getElementById("costO2").innerHTML = next_cost[1];
-				document.getElementById("costO3").innerHTML = next_cost[2];
+				if(next_cost.length > 0)
+					document.getElementById("costO1").innerHTML += next_cost[0];
+				if(next_cost.length > 1)
+					document.getElementById("costO2").innerHTML += next_cost[1];
+				if(next_cost.length > 2)
+					document.getElementById("costO3").innerHTML += next_cost[2];
+			}
+			
+			function title(){
+				ctx.font = "14px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText('Parent A', 110,230);
+				ctx.fillText('Parent B', 110,460);
+				ctx.fillText('Generate AB', 110,710);
+				
+				ctx.fillText('E-set', 410,710);
+				ctx.fillText('intermediates', 650,710);
+				ctx.fillText('offsprings', 900,710);
+				
+				ctx.fillStyle = "red";
+				ctx.fillText('(1)', 790,20);
+				ctx.fillText('(2)', 790,230);
+				ctx.fillText('(3)', 790,470);
+			}
+			
+			function createCities(n){
+				var r = 3;
+				for(var i = 0; i < n; i++){
+					var city = new Array();
+					var randX = Math.floor(Math.random() * (180)) + 50;
+					var randY = Math.floor(Math.random() * (180)) + 20;
+					cities.push([randX,randY]);
+					order.push(i);
+				}
+				order.push(0);
+			}
+			
+			function keepCities(){
+				var r = 3;
+				title();
+				for(var i = 0; i < totalCities; i++){
+					var X = cities[i][0];
+					var Y = cities[i][1];
+					
+					ctx.beginPath();
+					ctx.arc(X, Y, r, 0, 2 * Math.PI);
+					ctx.strokeStyle = 'black';
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X, Y + 230, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X, Y + 470, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.arc(X + 300, Y, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 300, Y + 230, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 300, Y + 470, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.arc(X + 540, Y, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 540, Y + 230, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 540, Y + 470, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.arc(X + 790, Y, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 790, Y + 230, r, 0, 2 * Math.PI);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.arc(X + 790, Y + 470, r, 0, 2 * Math.PI);
+					ctx.stroke();
+				}
+			}
+			
+			function mergePath(A, B){
+				for(var i = 0; i < A.length-1; i++){
+					ctx.beginPath();
+					ctx.moveTo(cities[A[i]][0],cities[A[i]][1] + 470);
+					ctx.lineTo(cities[A[i+1]][0],cities[A[i+1]][1] + 470);
+					ctx.strokeStyle = 'red';
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.moveTo(cities[B[i]][0],cities[B[i]][1] + 470);
+					ctx.lineTo(cities[B[i+1]][0],cities[B[i+1]][1] + 470);
+					ctx.strokeStyle = 'green';
+					ctx.stroke();
+				}
+			}
+			
+			function drawInter(arr, e){
+				var intermd = new Array();
+				for(var i = 0; i < e.length; i++){
+					var temp = arr.slice();
+					for(var j = 0; j < e[i].length; j++){
+						for(var k = 0; k < e[i][j].length-1; k += 2){
+							for(var l = 0; l < temp.length; l++){
+								if(e[i][j][k] == temp[l][0])
+									if(e[i][j][k+1] == temp[l][1]){
+										var idx = temp.indexOf(temp[l]);
+										if(idx > -1) temp.splice(idx,1);
+										break;
+									}
+								if(e[i][j][k+1] == temp[l][0])
+									if(e[i][j][k] == temp[l][1]){
+										var idx = temp.indexOf(temp[l]);
+										if(idx > -1) temp.splice(idx,1);
+										break;
+									}
+							}
+						}
+						for(var k = 1; k < e[i][j].length; k += 2){
+							edgeB = [e[i][j][k],e[i][j][k+1]];
+							temp.push(edgeB.slice());
+							while(edgeB.length > 0)	edgeB.pop();
+						}
+					}
+					intermd.push(temp.slice());
+					while(temp.length > 0)	temp.pop();
+				}
+				for(var i = 0; i < intermd.length; i++){
+					if(i == 0)		z = 0;
+					else if(i == 1)	z = 230;
+					else if(i == 2)	z = 470;
+					else			break;
+					
+					for(var j = 0; j < intermd[i].length; j++){
+						ctx.beginPath();
+						ctx.moveTo(cities[intermd[i][j][0]][0] + 540,cities[intermd[i][j][0]][1] + z);
+						ctx.lineTo(cities[intermd[i][j][1]][0] + 540,cities[intermd[i][j][1]][1] + z);
+						ctx.strokeStyle = 'black';
+						ctx.stroke();
+					}
+				}
+			}
+			
+			function drawPath(arr){
+				for(var i = 0; i < arr.length; i++){
+					if(i == 0)		z = 0;
+					else if(i == 1)	z = 230;
+					else if(i == 2)	z = 470;
+					else			break;
+					
+					for(var j = 0; j < arr[i].length-1; j++){
+						ctx.beginPath();
+						ctx.moveTo(cities[arr[i][j]][0] + 790,cities[arr[i][j]][1] + z);
+						ctx.lineTo(cities[arr[i][j+1]][0] + 790,cities[arr[i][j+1]][1] + z);
+						ctx.strokeStyle = 'black';
+						ctx.stroke();
+					}
+				}
+			}
+			
+			function drawSub(arr){
+				for(var i = 0; i < arr.length; i++){
+					var toggle = 1;
+					if(i == 0)		z = 0;
+					else if(i == 1)	z = 230;
+					else if(i == 2)	z = 470;
+					else			break;
+					
+					for(var j = 0; j < arr[i].length; j++)
+						for(var k = 0; k < arr[i][j].length-1; k++){
+							if(toggle == 1){
+								ctx.beginPath();
+								ctx.moveTo(cities[arr[i][j][k]][0] + 300,cities[arr[i][j][k]][1] + z);
+								ctx.lineTo(cities[arr[i][j][k+1]][0] + 300,cities[arr[i][j][k+1]][1] + z);
+								ctx.strokeStyle = 'red';
+								ctx.stroke();
+							} else {
+								ctx.beginPath();
+								ctx.moveTo(cities[arr[i][j][k]][0] + 300,cities[arr[i][j][k]][1] + z);
+								ctx.lineTo(cities[arr[i][j][k+1]][0] + 300,cities[arr[i][j][k+1]][1] + z);
+								ctx.strokeStyle = 'green';
+								ctx.stroke();
+							}
+							toggle *= -1;
+						}
+				}
+			}
+			
+			function drawTwoPath(arr1,arr2){
+				for(var i = 0; i < arr1.length-1; i++){
+					ctx.beginPath();
+					ctx.moveTo(cities[arr1[i]][0],cities[arr1[i]][1]);
+					ctx.lineTo(cities[arr1[i+1]][0],cities[arr1[i+1]][1]);
+					ctx.strokeStyle = 'red';
+					ctx.stroke();
+				
+					ctx.beginPath();
+					ctx.moveTo(cities[arr2[i]][0],cities[arr2[i]][1] + 230);
+					ctx.lineTo(cities[arr2[i+1]][0],cities[arr2[i+1]][1] + 230);
+					ctx.strokeStyle = 'green';
+					ctx.stroke();
+				}
 			}
 		</script>
 	</body>

@@ -2,7 +2,8 @@
 html, body{min-width:1260px; width:100%; height:100%}
 	#bar{width:100%; height:35px; background-color:#d8d8d8}
 	.Items{float:left; margin:5px}
-	#result{width:100%}
-	#canv{float:left; width:80%}
+	#result{width:100%; height:100%}
+	#laycanv{float:left; width:80%; height:100%}
 	#costs{float:left; width:18%; height:100%; padding-left:1%; border-left:1px solid #d8d8d8; font-size:12px}
 	.costPO{width:100%}
+	#offs{border-top:1px solid #d8d8d8;}
