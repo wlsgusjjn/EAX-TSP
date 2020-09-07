@@ -641,14 +641,14 @@ function title(){
 	ctx.fillText('Parent B', 110,460);
 	ctx.fillText('Generate AB', 110,710);
 	
-	ctx.fillText('E-set', 410,710);
-	ctx.fillText('intermediates', 650,710);
-	ctx.fillText('offsprings', 900,710);
+	ctx.fillText('E-set', 360,710);
+	ctx.fillText('intermediates', 600,710);
+	ctx.fillText('offsprings', 850,710);
 	
 	ctx.fillStyle = "red";
-	ctx.fillText('(1)', 790,20);
-	ctx.fillText('(2)', 790,230);
-	ctx.fillText('(3)', 790,470);
+	ctx.fillText('(1)', 760,20);
+	ctx.fillText('(2)', 760,230);
+	ctx.fillText('(3)', 760,470);
 }
 
 function createCities(n){
@@ -682,33 +682,33 @@ function keepCities(){
 		ctx.stroke();
 		
 		ctx.beginPath();
-		ctx.arc(X + 300, Y, r, 0, 2 * Math.PI);
+		ctx.arc(X + 250, Y, r, 0, 2 * Math.PI);
 		ctx.stroke();
 		ctx.beginPath();
-		ctx.arc(X + 300, Y + 230, r, 0, 2 * Math.PI);
+		ctx.arc(X + 250, Y + 230, r, 0, 2 * Math.PI);
 		ctx.stroke();
 		ctx.beginPath();
-		ctx.arc(X + 300, Y + 470, r, 0, 2 * Math.PI);
-		ctx.stroke();
-		
-		ctx.beginPath();
-		ctx.arc(X + 540, Y, r, 0, 2 * Math.PI);
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.arc(X + 540, Y + 230, r, 0, 2 * Math.PI);
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.arc(X + 540, Y + 470, r, 0, 2 * Math.PI);
+		ctx.arc(X + 250, Y + 470, r, 0, 2 * Math.PI);
 		ctx.stroke();
 		
 		ctx.beginPath();
-		ctx.arc(X + 790, Y, r, 0, 2 * Math.PI);
+		ctx.arc(X + 490, Y, r, 0, 2 * Math.PI);
 		ctx.stroke();
 		ctx.beginPath();
-		ctx.arc(X + 790, Y + 230, r, 0, 2 * Math.PI);
+		ctx.arc(X + 490, Y + 230, r, 0, 2 * Math.PI);
 		ctx.stroke();
 		ctx.beginPath();
-		ctx.arc(X + 790, Y + 470, r, 0, 2 * Math.PI);
+		ctx.arc(X + 490, Y + 470, r, 0, 2 * Math.PI);
+		ctx.stroke();
+		
+		ctx.beginPath();
+		ctx.arc(X + 740, Y, r, 0, 2 * Math.PI);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.arc(X + 740, Y + 230, r, 0, 2 * Math.PI);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.arc(X + 740, Y + 470, r, 0, 2 * Math.PI);
 		ctx.stroke();
 	}
 }
@@ -767,8 +767,8 @@ function drawInter(arr, e){
 		
 		for(var j = 0; j < intermd[i].length; j++){
 			ctx.beginPath();
-			ctx.moveTo(cities[intermd[i][j][0]][0] + 540,cities[intermd[i][j][0]][1] + z);
-			ctx.lineTo(cities[intermd[i][j][1]][0] + 540,cities[intermd[i][j][1]][1] + z);
+			ctx.moveTo(cities[intermd[i][j][0]][0] + 490,cities[intermd[i][j][0]][1] + z);
+			ctx.lineTo(cities[intermd[i][j][1]][0] + 490,cities[intermd[i][j][1]][1] + z);
 			ctx.strokeStyle = 'black';
 			ctx.stroke();
 		}
@@ -784,8 +784,8 @@ function drawPath(arr){
 		
 		for(var j = 0; j < arr[i].length-1; j++){
 			ctx.beginPath();
-			ctx.moveTo(cities[arr[i][j]][0] + 790,cities[arr[i][j]][1] + z);
-			ctx.lineTo(cities[arr[i][j+1]][0] + 790,cities[arr[i][j+1]][1] + z);
+			ctx.moveTo(cities[arr[i][j]][0] + 740,cities[arr[i][j]][1] + z);
+			ctx.lineTo(cities[arr[i][j+1]][0] + 740,cities[arr[i][j+1]][1] + z);
 			ctx.strokeStyle = 'black';
 			ctx.stroke();
 		}
@@ -804,14 +804,14 @@ function drawSub(arr){
 			for(var k = 0; k < arr[i][j].length-1; k++){
 				if(toggle == 1){
 					ctx.beginPath();
-					ctx.moveTo(cities[arr[i][j][k]][0] + 300,cities[arr[i][j][k]][1] + z);
-					ctx.lineTo(cities[arr[i][j][k+1]][0] + 300,cities[arr[i][j][k+1]][1] + z);
+					ctx.moveTo(cities[arr[i][j][k]][0] + 250,cities[arr[i][j][k]][1] + z);
+					ctx.lineTo(cities[arr[i][j][k+1]][0] + 250,cities[arr[i][j][k+1]][1] + z);
 					ctx.strokeStyle = 'red';
 					ctx.stroke();
 				} else {
 					ctx.beginPath();
-					ctx.moveTo(cities[arr[i][j][k]][0] + 300,cities[arr[i][j][k]][1] + z);
-					ctx.lineTo(cities[arr[i][j][k+1]][0] + 300,cities[arr[i][j][k+1]][1] + z);
+					ctx.moveTo(cities[arr[i][j][k]][0] + 250,cities[arr[i][j][k]][1] + z);
+					ctx.lineTo(cities[arr[i][j][k+1]][0] + 250,cities[arr[i][j][k+1]][1] + z);
 					ctx.strokeStyle = 'green';
 					ctx.stroke();
 				}
